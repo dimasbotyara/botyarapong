@@ -309,6 +309,14 @@ class GameServer:
             except Exception:
                 pass
 
+    def send_start_config(self, config):
+        """Отправить клиенту параметры матча и сигнал старта"""
+        if self.client_sid and self.connected:
+            try:
+                self.sio.emit('game_start', config, to=self.client_sid)
+            except Exception:
+                pass
+
     def get_reconnect_status(self):
         """Возвращает (waiting: bool, time_left: float, gave_up: bool)"""
         if self.gave_up:
@@ -387,14 +395,6 @@ class GameClient:
         if self.connected:
             try:
                 self.sio.emit('client_ready', {})
-            except Exception:
-                pass
-
-    def send_start_config(self, config):
-        """Отправить клиенту параметры матча и сигнал старта"""
-        if self.client_sid and self.connected:
-            try:
-                self.sio.emit('game_start', config, to=self.client_sid)
             except Exception:
                 pass
 
