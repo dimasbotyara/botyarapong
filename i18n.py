@@ -325,6 +325,10 @@ STRINGS = {
         "en": "GO!",
         "ru": "GO!",
     },
+    "network.waiting_for_host": {
+        "en": "Waiting for host to start...",
+        "ru": "Ожидаем хоста...",
+    },
 
     # === POWERUP NAMES (для индикаторов) ===
     "pu.magnet": {"en": "Magnet", "ru": "Магнит"},

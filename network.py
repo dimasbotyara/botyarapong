@@ -152,6 +152,7 @@ class GameServer:
         self.on_client_disconnect = None
         self.on_client_reconnect = None
         self.on_gave_up = None  # клиент не вернулся за окно
+        self.on_client_ready = None
 
         self.running = False
         self._thread = None
@@ -169,6 +170,12 @@ class GameServer:
         def disconnect(sid):
             if sid == self.client_sid:
                 self._on_disconnect()
+
+        @self.sio.on('client_ready')
+        def on_client_ready(sid, data):
+            """Клиент получил настройки и готов играть"""
+            if sid == self.client_sid and self.on_client_ready:
+                self.on_client_ready()
 
         @self.sio.on('join')
         def on_join(sid, data):
@@ -370,8 +377,26 @@ class GameClient:
         self.on_reconnect_callback = None
         self.on_gave_up_callback = None
         self.on_rejected_callback = None
+        self.on_client_ready = None
+        self.start_config = None
+        self.on_start_callback = None
 
         self._setup_events()
+
+    def send_ready(self):
+        if self.connected:
+            try:
+                self.sio.emit('client_ready', {})
+            except Exception:
+                pass
+
+    def send_start_config(self, config):
+        """Отправить клиенту параметры матча и сигнал старта"""
+        if self.client_sid and self.connected:
+            try:
+                self.sio.emit('game_start', config, to=self.client_sid)
+            except Exception:
+                pass
 
     def _setup_events(self):
         @self.sio.event
@@ -385,6 +410,13 @@ class GameClient:
         @self.sio.event
         def disconnect():
             self._on_disconnect()
+
+        @self.sio.on('game_start')
+        def on_game_start(data):
+            self.start_config = data
+            self.waiting_reconnect = False
+            if self.on_start_callback:
+                self.on_start_callback(data)
 
         @self.sio.on('joined')
         def on_joined(data):

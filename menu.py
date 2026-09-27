@@ -46,6 +46,9 @@ class Menu:
         self.lobby_ready = False
         self._discovery_active = False
 
+        self.waiting_for_host = False
+        self._network_start_config = None
+
         self._rebuild_all()
 
     # =================================================================
@@ -478,6 +481,19 @@ class Menu:
             }
             if self._pending_mode == MODE_BOT:
                 res["difficulty"] = self._pending_difficulty
+
+            # Если это сетевой матч и мы ХОСТ — рассылаем настройки клиенту
+            if (self._pending_mode == MODE_NETWORK and
+                    self.server is not None):
+                config = {
+                    "game_mode": gm,
+                    "max_score": ms,
+                }
+                self.server.send_start_config(config)
+                # Передаём конфиг в main.py через результат
+                res["network_config"] = config
+                res["is_host"] = True
+
             return res
 
         if self.setup_back.handle_event(e):
@@ -519,7 +535,10 @@ class Menu:
             self._leave_lobby()
             self.state = STATE_NETWORK_MENU
             return None
-        if self.lobby_ready and self.lobby_start.handle_event(e):
+
+        # Только ХОСТ может запускать настройку матча
+        is_host = self.server is not None
+        if is_host and self.lobby_ready and self.lobby_start.handle_event(e):
             self._pending_mode = MODE_NETWORK
             sw, sh = self.screen.get_size()
             self._build_setup(sw, sh)
@@ -535,11 +554,16 @@ class Menu:
         self.server = GameServer(settings.player_name, settings.p1_color)
         self.server.on_client_connect = self._on_client_join
         self.server.on_client_disconnect = self._on_client_leave
+        self.server.on_client_ready = self._on_client_ready
         self.server.start()
         self.status_key = "network.waiting"
         self.status_args = {}
         self.lobby_ready = False
         self.state = STATE_NETWORK_LOBBY
+
+    def _on_client_ready(self):
+        """Клиент подтвердил получение настроек"""
+        pass  # Можно добавить индикацию, если нужно
 
     def _connect(self, ip):
         self._stop_discovery()
@@ -547,18 +571,27 @@ class Menu:
         self.status_key = "network.connecting"
         self.status_args = {"ip": ip}
         self.lobby_ready = False
-        self.state = STATE_NETWORK_LOBBY
 
         def worker():
             if self.client and self.client.connect_to(ip):
                 self.status_key = "network.connected"
                 self.status_args = {"name": self.client.host_name}
                 self.lobby_ready = True
+                # Клиент: ждём сигнала game_start от хоста
+                self.client.on_start_callback = self._on_network_start
+                self.client.send_ready()
             else:
                 self.status_key = "network.failed"
                 self.status_args = {}
 
+        self.state = STATE_NETWORK_LOBBY
+
         threading.Thread(target=worker, daemon=True).start()
+
+    def _on_network_start(self, config):
+        """Клиент получил настройки от хоста — стартуем игру"""
+        self._network_start_config = config
+        # main.py подхватит это через update()
 
     def _leave_lobby(self):
         if self.server:
@@ -625,6 +658,21 @@ class Menu:
             self.lobby_back.update(mp, dt)
             if self.lobby_ready:
                 self.lobby_start.update(mp, dt)
+
+    def poll_network_start(self):
+        """Вызывается из main.py. Возвращает dict или None."""
+        if self._network_start_config is None:
+            return None
+        cfg = self._network_start_config
+        self._network_start_config = None
+        return {
+            "action": "start_game",
+            "mode": MODE_NETWORK,
+            "game_mode": cfg.get("game_mode", "normal"),
+            "max_score": cfg.get("max_score", 7),
+            "network_config": cfg,
+            "is_client": True,
+        }
 
     # =================================================================
     #  DRAW
@@ -816,7 +864,17 @@ class Menu:
                 sh // 2 - 6, font_size=21, color=(120, 230, 150),
                 weight="medium"
             )
+
+        # Хост видит кнопку "Начать игру", клиент — "Ожидаем хоста..."
+        is_host = self.server is not None
+        if is_host and self.lobby_ready:
             self.lobby_start.draw(self.screen)
+        elif not is_host and self.lobby_ready:
+            draw_text_centered(
+                self.screen, t("network.waiting_for_host"),
+                sh // 2 + 56, font_size=24,
+                color=(255, 200, 100), weight="medium"
+            )
         self.lobby_back.draw(self.screen)
 
     # =================================================================

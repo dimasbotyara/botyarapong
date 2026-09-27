@@ -124,6 +124,41 @@ def main():
         if game:
             game.update(dt)
         else:
+            # Проверяем, не пришёл ли сигнал старта от хоста (клиент)
+            net_start = menu.poll_network_start()
+            if net_start is not None:
+                mode = net_start["mode"]
+                game_mode = net_start["game_mode"]
+                max_score = net_start["max_score"]
+
+                p1_color = settings.p1_color
+                p2_color = settings.p2_color
+                p1_name = settings.player_name
+                p2_name = "Player 2"
+                server = None
+                client = menu.client
+
+                if client:
+                    p1_name = client.host_name or "Host"
+                    p1_color = tuple(client.host_color)
+                    p2_name = settings.player_name
+                    p2_color = settings.p2_color
+                    menu.client = None  # не закрываем
+
+                game = Game(
+                    screen=screen,
+                    mode=mode,
+                    game_mode=game_mode,
+                    p1_color=p1_color,
+                    p2_color=p2_color,
+                    max_score=max_score,
+                    bot_difficulty="medium",
+                    network_server=server,
+                    network_client=client,
+                    p1_name=p1_name,
+                    p2_name=p2_name,
+                )
+
             menu.update(dt)
 
         if game:
