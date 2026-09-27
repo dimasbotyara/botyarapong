@@ -2,19 +2,15 @@
 
 > Classic Pong on steroids — with power-ups, network play, and pure chaos! 💥
 
-![Python CI](https://github.com/dimasbotyara/botyarapong/actions/workflows/python-app.yml/badge.svg)
-![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
-![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)
-![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
-![Pygame](https://img.shields.io/badge/Pygame-2.5+-green.svg?style=for-the-badge&logo=python&logoColor=white)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-5.10+-black.svg?style=for-the-badge&logo=socket.io&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg?style=for-the-badge)
 
-![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square)
-![Code Size](https://img.shields.io/badge/Code-3500%2B%20lines-orange?style=flat-square)
-![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square)
+![Python CI](https://github.com/dimasbotyara/botyarapong/actions/workflows/python-app.yml/badge.svg)
+![Python 3.10](https://img.shields.io/badge/Python-3.10-blue?logo=python&logoColor=white)
+![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
+![Pygame](https://img.shields.io/badge/Pygame-2.5+-green?logo=python&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-5.10+-black?logo=socketdotio&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
 
 ---
 
