@@ -1,0 +1,5 @@
+pygame>=2.5.0
+python-socketio>=5.10.0
+aiohttp>=3.9.0
+werkzeug>=3.0.0
+requests>=2.31.0
